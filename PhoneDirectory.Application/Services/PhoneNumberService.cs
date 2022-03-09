@@ -29,11 +29,23 @@ namespace PhoneDirectory.Application.Services
                 .Include(x => x.User)
                 .FirstOrDefaultAsync(x => x.Id == phoneNumberId);
 
+            if (phoneNumber is null)
+            {
+                throw new PhoneNumberNotFoundException(phoneNumberId);
+            }
+
             return _mapper.Map<PhoneNumberDto>(phoneNumber);
         }
 
         public async Task Create(CreatePhoneNumberDto phoneNumberDto)
         {
+            var user = await _dbContext.Users.FirstOrDefaultAsync(x => x.Id == phoneNumberDto.UserId);
+
+            if (user is null)
+            {
+                throw new UserNotFoundException(phoneNumberDto.UserId);
+            }
+            
             var phoneNumber = _mapper.Map<PhoneNumber>(phoneNumberDto);
 
             await _dbContext.PhoneNumbers.AddAsync(phoneNumber);
@@ -42,15 +54,25 @@ namespace PhoneDirectory.Application.Services
 
         public async Task Update(UpdatePhoneNumberDto phoneNumberDto)
         {
-            var phoneNumber = await _dbContext.PhoneNumbers.FirstOrDefaultAsync(x => x.Id == phoneNumberDto.Id);
+            var phoneNumber = await _dbContext.PhoneNumbers
+                .Include(x => x.User)
+                .FirstOrDefaultAsync(x => x.Id == phoneNumberDto.Id);
 
             if (phoneNumber is null)
             {
                 throw new PhoneNumberNotFoundException(phoneNumberDto.Id);
             }
             
-            phoneNumber.UserId = phoneNumber.UserId;
-            phoneNumber.UserPhoneNumber = phoneNumber.UserPhoneNumber;
+            var user = await _dbContext.Users.FirstOrDefaultAsync(x => x.Id == phoneNumberDto.UserId);
+
+            if (user is null)
+            {
+                throw new UserNotFoundException(phoneNumberDto.UserId);
+            }
+            
+            phoneNumber.UserId = phoneNumberDto.UserId;
+            phoneNumber.User = user;
+            phoneNumber.UserPhoneNumber = phoneNumberDto.UserPhoneNumber;
 
             _dbContext.PhoneNumbers.Update(phoneNumber);
             await _dbContext.SaveChangesAsync();

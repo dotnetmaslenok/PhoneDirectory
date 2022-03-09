@@ -24,35 +24,44 @@ namespace PhoneDirectory.UnitTests.DtoHelpers
                 {
                     new DivisionDto(2, "NestedDivision1", null, null)
                 });
-
-            // new List<ApplicationUserDto>()
-            // {
-            //     new(1, "TestUser1", false, 1, 
-            //         new DivisionDto(1, "TestDivision", null, null), 
-            //         new List<PhoneNumberDto>()
-            //         {
-            //             new(1, "TestPhoneNumber1", 1, 
-            //                 new ApplicationUserDto(1, "TestUser1", false, 1, null, null))
-            //         })
-            // },
-            // new List<DivisionDto>()
-            // {
-            //     new(2, "NestedDivision1", null, null)
-            // });
         }
-        
+
+        public static List<DivisionDto> GetManyDefaultDtos()
+        {
+            var divisionDtos = new List<DivisionDto>();
+
+            for (int i = 2; i < 5; i++)
+            {
+                divisionDtos.Add(new DivisionDto(i, $"TestDivision{i}", 
+                    new List<ApplicationUserDto>()
+                    {
+                        new ApplicationUserDto(i, $"TestUser{i}", false, i, null,
+                            new List<PhoneNumberDto>()
+                            {
+                                new(i, $"(1234)-567-89-1{i}", i, null)
+                            })
+                    },
+                    new List<DivisionDto>()
+                    {
+                        new DivisionDto(i, $"NestedDivision{i}", null, null)
+                    }));
+            }
+
+            return divisionDtos;
+        }
+
         public static CreateDivisionDto GetOneCreateDto()
         {
-            return new CreateDivisionDto("DivisionDto1",
+            return new CreateDivisionDto("CreatedDivisionDto1",
                 new List<CreateDivisionDto>()
                 {
-                    new("NestedDivisionDto1", null)
+                    new("CreatedNestedDivisionDto1", null)
                 });
         }
 
         public static UpdateDivisionDto GetOneUpdateDto()
         {
-            return new UpdateDivisionDto(1, "UpdatedDivisionName");
+            return new UpdateDivisionDto(2, "UpdatedDivisionName");
         }
 
         public static UpdateDivisionDto GetOneInvalidUpdateDto()

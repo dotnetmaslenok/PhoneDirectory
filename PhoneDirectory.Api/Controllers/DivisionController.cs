@@ -35,7 +35,7 @@ namespace PhoneDirectory.Api.Controllers
 
         [HttpGet]
         [Route("search")]
-        public async Task<IActionResult> GetDivisionsByName([FromQuery(Name = "n")] [StringLength(50, MinimumLength = 2)] string namePattern)
+        public async Task<IActionResult> GetDivisionsByName([FromQuery(Name = "n")] [Required(AllowEmptyStrings = false)] string namePattern)
         {
             var divisions = await _divisionService.SearchByName(namePattern);
 

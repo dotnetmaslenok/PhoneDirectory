@@ -28,9 +28,7 @@ namespace PhoneDirectory.Application.Services
         
         public async Task<DivisionDto> GetById(int divisionId)
         {
-            //TestDivision1
-            //NestedDivision1
-	        var division = await _dbContext.Divisions
+            var division = await _dbContext.Divisions
                 .Include(x => x.Users)
                 .Include(x => x.Divisions)
                 .FirstOrDefaultAsync(x => x.Id == divisionId);

@@ -48,6 +48,13 @@ namespace PhoneDirectory.Application.Services
 
         public async Task Create(CreateUserDto userDto)
         {
+            var division = await _dbContext.Divisions.FirstOrDefaultAsync(x => x.Id == userDto.DivisionId);
+            
+            if (division is null)
+            {
+                throw new DivisionNotFoundException(userDto.DivisionId);
+            }
+            
             var user = _mapper.Map<ApplicationUser>(userDto);
 
             await _dbContext.Users.AddAsync(user);
@@ -62,10 +69,18 @@ namespace PhoneDirectory.Application.Services
             {
                 throw new UserNotFoundException(userDto.Id);
             }
+
+            var division = await _dbContext.Divisions.FirstOrDefaultAsync(x => x.Id == userDto.DivisionId);
+
+            if (division is null)
+            {
+                throw new DivisionNotFoundException(userDto.DivisionId);
+            }
             
             user.Name = userDto.Name;
             user.IsChief = user.IsChief;
             user.DivisionId = user.DivisionId;
+            user.Division = division;
 
             _dbContext.Users.Update(user);
             await _dbContext.SaveChangesAsync();

@@ -21,7 +21,7 @@ namespace PhoneDirectory.Api.Controllers
 
         [HttpGet]
         [Route("{userId}")]
-        public async Task<IActionResult> GetById([FromRoute] [Range(1, int.MaxValue)] int userId)
+        public async Task<IActionResult> GetUser([FromRoute] [Range(1, int.MaxValue)] int userId)
         {
             var user = await _userService.GetById(userId);
 
@@ -35,7 +35,7 @@ namespace PhoneDirectory.Api.Controllers
 
         [HttpGet]
         [Route("search")]
-        public async Task<IActionResult> GetUsersByName([FromQuery(Name = "n")] [StringLength(50, MinimumLength = 2)] string namePattern)
+        public async Task<IActionResult> GetUsersByName([FromQuery(Name = "n")] [Required(AllowEmptyStrings = false)] string namePattern)
         {
             var users = await _userService.SearchByName(namePattern);
 
