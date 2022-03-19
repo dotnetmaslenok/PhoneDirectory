@@ -1,10 +1,14 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using PhoneDirectory.Application.Dtos;
 using PhoneDirectory.Application.Dtos.CreateDtos;
+using PhoneDirectory.Application.Dtos.FilterDtos;
+using PhoneDirectory.Application.Dtos.GetDtos;
 using PhoneDirectory.Application.Dtos.UpdateDtos;
 using PhoneDirectory.Application.Interfaces;
+using PhoneDirectory.Domain.CustomExceptions;
 
 namespace PhoneDirectory.Api.Controllers
 {
@@ -21,57 +25,69 @@ namespace PhoneDirectory.Api.Controllers
 
         [HttpGet]
         [Route("{divisionId}")]
+        [ProducesResponseType(typeof(DivisionDto), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> GetDivision([FromRoute] [Range(1, int.MaxValue)] int divisionId)
         {
-            var division = await _divisionService.GetById(divisionId);
 
-            if (division is null)
-            {
-                return NotFound();
-            }
-            
-            return Ok(division);
+	        try
+	        { 
+		        var division = await _divisionService.GetById(divisionId);
+		        return Ok(division);
+	        }
+	        catch (DivisionNotFoundException ex)
+	        {
+		        return BadRequest(ex.Message);
+	        }
         }
 
-        [HttpGet]
+        [HttpPost]
         [Route("search")]
-        public async Task<IActionResult> GetDivisionsByName([FromQuery(Name = "n")] [Required(AllowEmptyStrings = false)] string namePattern)
+        [ProducesResponseType(typeof(List<DivisionDto>), (int)HttpStatusCode.OK)]
+        public async Task<IActionResult> GetDivisionsByName([FromBody] FilterDto filterDto)
         {
-            var divisions = await _divisionService.SearchByName(namePattern);
-
-            if (divisions is null)
-            {
-                return NotFound();
-            }
+            var divisions = await _divisionService.SearchByName(filterDto);
 
             return Ok(divisions);
         }
         
         [HttpPost]
-        [Route("create")]
+        [ProducesResponseType(typeof(int), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> CreateDivision([FromBody] CreateDivisionDto divisionDto)
         {
-            await _divisionService.Create(divisionDto);
+            var divisionId = await _divisionService.Create(divisionDto);
 
-            return Ok();
+            return Ok(divisionId);
         }
 
         [HttpPatch]
-        [Route("update")]
+        [ProducesResponseType((int)HttpStatusCode.OK)]
         public async Task<IActionResult> UpdateDivision([FromBody] UpdateDivisionDto divisionDto)
         {
-            await _divisionService.Update(divisionDto);
-
-            return Ok();
+	        try
+	        {
+		        await _divisionService.Update(divisionDto);
+		        return Ok();
+	        }
+	        catch (DivisionNotFoundException ex)
+	        {
+		        return BadRequest(ex.Message);
+	        }
         }
 
         [HttpDelete]
-        [Route("delete/{divisionId}")]
+        [Route("{divisionId}")]
+        [ProducesResponseType((int)HttpStatusCode.OK)]
         public async Task<IActionResult> DeleteDivision([FromRoute] [Range(1, int.MaxValue)] int divisionId)
         {
-            await _divisionService.Delete(divisionId);
-
-            return Ok();
+	        try
+	        {
+		        await _divisionService.Delete(divisionId);
+		        return Ok();
+	        }
+	        catch (DivisionNotFoundException ex)
+	        {
+		        return BadRequest(ex.Message);
+	        }
         }
     }
 }

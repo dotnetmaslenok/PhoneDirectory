@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using PhoneDirectory.Domain.BaseEntities;
 
 namespace PhoneDirectory.Domain.Entities
@@ -9,12 +8,14 @@ namespace PhoneDirectory.Domain.Entities
         public string Name { get; set; }
         
         public List<ApplicationUser> Users { get; set; }
+
+        public Division ParentDivision { get; set; }
         
-        public List<Division> Divisions { get; set; }
+        public List<Division> ChildDivisions { get; set; }
 
         public Division()
         {
-            Divisions = new List<Division>();
+            ChildDivisions = new List<Division>();
         }
     }
 }

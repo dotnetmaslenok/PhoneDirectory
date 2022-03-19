@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Generic;
 using PhoneDirectory.Application.BaseDtos;
 
 namespace PhoneDirectory.Application.Dtos.GetDtos
@@ -9,5 +7,7 @@ namespace PhoneDirectory.Application.Dtos.GetDtos
         int Id,
         string Name,
         List<ApplicationUserDto> Users,
-        List<DivisionDto> Divisions) : BaseDto(Id);
+        int ParentDivisionId,
+        DivisionDto ParentDivision,
+        List<DivisionDto> ChildDivisions) : BaseDto(Id);
 }

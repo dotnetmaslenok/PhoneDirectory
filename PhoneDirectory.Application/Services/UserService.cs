@@ -1,10 +1,9 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using PhoneDirectory.Application.Dtos;
 using PhoneDirectory.Application.Dtos.CreateDtos;
+using PhoneDirectory.Application.Dtos.FilterDtos;
 using PhoneDirectory.Application.Dtos.GetDtos;
 using PhoneDirectory.Application.Dtos.UpdateDtos;
 using PhoneDirectory.Application.Interfaces;
@@ -35,18 +34,44 @@ namespace PhoneDirectory.Application.Services
             return _mapper.Map<ApplicationUserDto>(user);
         }
 
-        public async Task<List<ApplicationUserDto>> SearchByName(string namePattern)
+        public async Task<List<ApplicationUserDto>> SearchByName(FilterDto filterDto)
         {
-            var users = await _dbContext.Users
-                .Where(x => x.Name.ToLower().Contains(namePattern.ToLower()))
-                .Include(x => x.Division)
-                .Include(x => x.PhoneNumbers)
-                .ToListAsync();
+	        var users = new List<ApplicationUser>();
 
-            return _mapper.Map<List<ApplicationUserDto>>(users);
+	        if (filterDto is not null && filterDto.ParentId.HasValue)
+	        {
+		        var parentDivision = await _dbContext.Divisions
+			        .Include(x => x.Users)
+			        .ThenInclude(x => x.PhoneNumbers)
+			        .FirstOrDefaultAsync(x => x.Id == filterDto.ParentId);
+
+		        if (!string.IsNullOrEmpty(filterDto.Name))
+		        {
+			        foreach (var user in parentDivision.Users)
+			        {
+				        if (user.Name.ToLower().Contains(filterDto.Name.ToLower()))
+				        {
+					        users.Add(user);
+				        }
+			        }
+		        }
+		        else
+		        {
+			        users.AddRange(parentDivision.Users);
+		        }
+	        }
+	        else
+	        {
+		        users = await _dbContext.Users
+			        .Include(x => x.Division)
+			        .Include(x => x.PhoneNumbers)
+			        .ToListAsync();
+	        }
+
+	        return _mapper.Map<List<ApplicationUserDto>>(users);
         }
 
-        public async Task Create(CreateUserDto userDto)
+        public async Task<int> Create(CreateUserDto userDto)
         {
             var division = await _dbContext.Divisions.FirstOrDefaultAsync(x => x.Id == userDto.DivisionId);
             
@@ -59,6 +84,8 @@ namespace PhoneDirectory.Application.Services
 
             await _dbContext.Users.AddAsync(user);
             await _dbContext.SaveChangesAsync();
+
+            return user.Id;
         }
 
         public async Task Update(UpdateUserDto userDto)

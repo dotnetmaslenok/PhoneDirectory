@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using PhoneDirectory.Application.Dtos.GetDtos;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace PhoneDirectory.Application.Dtos.CreateDtos
 {

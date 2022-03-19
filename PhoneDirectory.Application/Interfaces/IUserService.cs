@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using PhoneDirectory.Application.Dtos;
 using PhoneDirectory.Application.Dtos.CreateDtos;
+using PhoneDirectory.Application.Dtos.FilterDtos;
 using PhoneDirectory.Application.Dtos.GetDtos;
 using PhoneDirectory.Application.Dtos.UpdateDtos;
 
@@ -11,9 +11,9 @@ namespace PhoneDirectory.Application.Interfaces
     {
         public Task<ApplicationUserDto> GetById(int userId);
 
-        public Task<List<ApplicationUserDto>> SearchByName(string namePattern);
+        public Task<List<ApplicationUserDto>> SearchByName(FilterDto filterDto);
 
-        public Task Create(CreateUserDto userDto);
+        public Task<int> Create(CreateUserDto userDto);
 
         public Task Update(UpdateUserDto userDto);
 

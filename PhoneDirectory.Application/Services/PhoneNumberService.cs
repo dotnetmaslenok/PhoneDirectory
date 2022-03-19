@@ -1,7 +1,7 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using PhoneDirectory.Application.Dtos;
 using PhoneDirectory.Application.Dtos.CreateDtos;
 using PhoneDirectory.Application.Dtos.GetDtos;
 using PhoneDirectory.Application.Dtos.UpdateDtos;
@@ -37,7 +37,16 @@ namespace PhoneDirectory.Application.Services
             return _mapper.Map<PhoneNumberDto>(phoneNumber);
         }
 
-        public async Task Create(CreatePhoneNumberDto phoneNumberDto)
+        public async Task<List<PhoneNumberDto>> GetAll()
+        {
+	        var phoneNumbers = await _dbContext.PhoneNumbers
+		        .Include(x => x.User)
+		        .ToListAsync();
+
+	        return _mapper.Map<List<PhoneNumberDto>>(phoneNumbers);
+        }
+
+        public async Task<int> Create(CreatePhoneNumberDto phoneNumberDto)
         {
             var user = await _dbContext.Users.FirstOrDefaultAsync(x => x.Id == phoneNumberDto.UserId);
 
@@ -50,6 +59,8 @@ namespace PhoneDirectory.Application.Services
 
             await _dbContext.PhoneNumbers.AddAsync(phoneNumber);
             await _dbContext.SaveChangesAsync();
+
+            return phoneNumber.Id;
         }
 
         public async Task Update(UpdatePhoneNumberDto phoneNumberDto)

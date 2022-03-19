@@ -1,9 +1,7 @@
 ﻿using System.Collections.Generic;
-using System.Net.NetworkInformation;
 using PhoneDirectory.Application.Dtos.CreateDtos;
 using PhoneDirectory.Application.Dtos.GetDtos;
 using PhoneDirectory.Application.Dtos.UpdateDtos;
-using PhoneDirectory.Domain.Entities;
 
 namespace PhoneDirectory.UnitTests.DtoHelpers
 {
@@ -14,15 +12,15 @@ namespace PhoneDirectory.UnitTests.DtoHelpers
             return new DivisionDto(1, "TestDivision1", 
                 new List<ApplicationUserDto>()
                 {
-                    new ApplicationUserDto(1, "TestUser1", false, 1, null,
+                    new ApplicationUserDto(1, "TestUser1", false, 1, default,
                         new List<PhoneNumberDto>()
                         {
-                            new(1, "(1234)-567-89-11", 1, null)
+                            new(1, "(1234)-567-89-11", 1, default)
                         })
                 },
-                new List<DivisionDto>()
+                default, default, new List<DivisionDto>()
                 {
-                    new DivisionDto(2, "NestedDivision1", null, null)
+                    new DivisionDto(2, "NestedDivision1", default, 1, default, default)
                 });
         }
 
@@ -35,15 +33,15 @@ namespace PhoneDirectory.UnitTests.DtoHelpers
                 divisionDtos.Add(new DivisionDto(i, $"TestDivision{i}", 
                     new List<ApplicationUserDto>()
                     {
-                        new ApplicationUserDto(i, $"TestUser{i}", false, i, null,
+                        new ApplicationUserDto(i, $"TestUser{i}", false, i, default,
                             new List<PhoneNumberDto>()
                             {
-                                new(i, $"(1234)-567-89-1{i}", i, null)
+                                new(i, $"(1234)-567-89-1{i}", i, default)
                             })
                     },
-                    new List<DivisionDto>()
+                    default, default, new List<DivisionDto>()
                     {
-                        new DivisionDto(i, $"NestedDivision{i}", null, null)
+                        new DivisionDto(i, $"NestedDivision{i}", default, i, default, default)
                     }));
             }
 
@@ -53,9 +51,10 @@ namespace PhoneDirectory.UnitTests.DtoHelpers
         public static CreateDivisionDto GetOneCreateDto()
         {
             return new CreateDivisionDto("CreatedDivisionDto1",
+                null,
                 new List<CreateDivisionDto>()
                 {
-                    new("CreatedNestedDivisionDto1", null)
+                    new("CreatedNestedDivisionDto1", default, default)
                 });
         }
 

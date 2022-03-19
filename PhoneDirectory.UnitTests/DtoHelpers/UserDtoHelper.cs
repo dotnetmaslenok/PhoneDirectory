@@ -11,7 +11,7 @@ namespace PhoneDirectory.UnitTests.DtoHelpers
         public static ApplicationUserDto GetOneDefaultDto()
         {
             return new ApplicationUserDto(1, "TestUser1", false, 1,
-                new DivisionDto(1, "TestDivision1", null, null), new List<PhoneNumberDto>()
+                DivisionDtoHelper.GetOneDefaultDto(), new List<PhoneNumberDto>()
                 {
                     new(1, "(1234)-567-89-11", 1, null)
                 });
@@ -24,7 +24,7 @@ namespace PhoneDirectory.UnitTests.DtoHelpers
             for (int i = 1; i < 4; i++)
             {
                 userDtos.Add(new ApplicationUserDto(i, $"TestUser{i}", false, i,
-                    new DivisionDto(i, $"TestDivision{i}", null, null), new List<PhoneNumberDto>()
+                    new DivisionDto(i, $"TestDivision{i}", default, i, default, default), new List<PhoneNumberDto>()
                     {
                         new(i, $"(1234)-567-89-1{i}", i, null)
                     }));

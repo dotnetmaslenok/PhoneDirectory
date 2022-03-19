@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using PhoneDirectory.Application.Dtos.GetDtos;
 
 namespace PhoneDirectory.Application.Dtos.CreateDtos
 {
@@ -8,5 +7,6 @@ namespace PhoneDirectory.Application.Dtos.CreateDtos
         [Required]
         [StringLength(50, MinimumLength = 2)]
         string Name,
-        List<CreateDivisionDto> Divisions);
+        int? ParentId,
+        List<CreateDivisionDto> ChildDivisions);
 }

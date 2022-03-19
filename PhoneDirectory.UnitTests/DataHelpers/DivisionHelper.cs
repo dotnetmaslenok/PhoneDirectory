@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using Microsoft.AspNetCore.Http;
+﻿using System.Collections.Generic;
 using PhoneDirectory.Domain.Entities;
 
 namespace PhoneDirectory.UnitTests.DataHelpers
@@ -11,9 +9,13 @@ namespace PhoneDirectory.UnitTests.DataHelpers
         {
             return new Division
             {
-                Name = "TestDivision1", Divisions = new List<Division>()
+                Name = "TestDivision1", ChildDivisions = new List<Division>()
                 {
-                    new Division() {Name = "NestedDivision1" }
+                    new() {Name = "TestNestedDivisionLevel1",
+                        ChildDivisions = new List<Division>()
+                        {
+                            new () {Name = "TestNestedDivisionLevel2"}
+                        }}
                 }
             };
         }
@@ -22,7 +24,7 @@ namespace PhoneDirectory.UnitTests.DataHelpers
         {
             return new Division
             {
-                Name = "CreatedDivisionDto1", Divisions = new List<Division>()
+                Name = "CreatedDivisionDto1", ChildDivisions = new List<Division>()
                 {
                     new Division() {Name = "CreatedNestedDivisionDto1" }
                 }

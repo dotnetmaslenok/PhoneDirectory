@@ -1,8 +1,6 @@
-﻿using System.Collections.Generic;
-using PhoneDirectory.Application.Dtos.CreateDtos;
+﻿using PhoneDirectory.Application.Dtos.CreateDtos;
 using PhoneDirectory.Application.Dtos.GetDtos;
 using PhoneDirectory.Application.Dtos.UpdateDtos;
-using PhoneDirectory.Domain.Entities;
 
 namespace PhoneDirectory.UnitTests.DtoHelpers
 {

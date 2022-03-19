@@ -1,10 +1,14 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using PhoneDirectory.Application.Dtos;
 using PhoneDirectory.Application.Dtos.CreateDtos;
+using PhoneDirectory.Application.Dtos.FilterDtos;
+using PhoneDirectory.Application.Dtos.GetDtos;
 using PhoneDirectory.Application.Dtos.UpdateDtos;
 using PhoneDirectory.Application.Interfaces;
+using PhoneDirectory.Domain.CustomExceptions;
 
 namespace PhoneDirectory.Api.Controllers
 {
@@ -21,66 +25,90 @@ namespace PhoneDirectory.Api.Controllers
 
         [HttpGet]
         [Route("{userId}")]
+        [ProducesResponseType(typeof(ApplicationUserDto), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> GetUser([FromRoute] [Range(1, int.MaxValue)] int userId)
         {
-            var user = await _userService.GetById(userId);
-
-            if (user is null)
+            try
             {
-                return NotFound();
+                var user = await _userService.GetById(userId);
+                return Ok(user);
             }
-            
-            return Ok(user);
+            catch (UserNotFoundException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+        
+        [HttpGet]
+        [Route("set-chief")]
+        [ProducesResponseType((int)HttpStatusCode.OK)]
+        public async Task<IActionResult> SetChief([FromQuery(Name = "u")] [Range(1, int.MaxValue)] int userId)
+        {
+            try
+            {
+                await _userService.SetChief(userId);
+                return Ok();
+            }
+            catch (UserNotFoundException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
-        [HttpGet]
+        [HttpPost]
         [Route("search")]
-        public async Task<IActionResult> GetUsersByName([FromQuery(Name = "n")] [Required(AllowEmptyStrings = false)] string namePattern)
+        [ProducesResponseType(typeof(List<ApplicationUserDto>), (int) HttpStatusCode.OK)]
+        public async Task<IActionResult> GetUsersByName([FromBody] FilterDto filterDto)
         {
-            var users = await _userService.SearchByName(namePattern);
-
-            if (users is null)
-            {
-                return NotFound();
-            }
+            var users = await _userService.SearchByName(filterDto);
 
             return Ok(users);
         }
 
-        [HttpGet]
-        [Route("set-chief")]
-        public async Task<IActionResult> SetChief([FromQuery(Name = "u")] [Range(1, int.MaxValue)] int userId)
-        {
-	        await _userService.SetChief(userId);
-
-	        return Ok();
-        }
-
         [HttpPost]
-        [Route("create")]
+        [ProducesResponseType(typeof(int) ,(int)HttpStatusCode.OK)]
         public async Task<IActionResult> CreateUser([FromBody] CreateUserDto userDto)
         {
-            await _userService.Create(userDto);
-
-            return Ok();
+            try
+            {
+                var userId = await _userService.Create(userDto);
+                return Ok(userId);
+            }
+            catch (DivisionNotFoundException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpPatch]
-        [Route("update")]
+        [ProducesResponseType((int)HttpStatusCode.OK)]
         public async Task<IActionResult> UpdateUser([FromBody] UpdateUserDto userDto)
         {
-            await _userService.Update(userDto);
-
-            return Ok();
+            try
+            {
+                await _userService.Update(userDto);
+                return Ok();
+            }
+            catch (UserNotFoundException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpDelete]
-        [Route("delete/{userId}")]
+        [Route("{userId}")]
+        [ProducesResponseType((int)HttpStatusCode.OK)]
         public async Task<IActionResult> DeleteUser([FromRoute] [Range(1, int.MaxValue)] int userId)
         {
-            await _userService.Delete(userId);
-
-            return Ok();
+            try
+            {
+                await _userService.Delete(userId);
+                return Ok();
+            }
+            catch (UserNotFoundException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
     }
 }

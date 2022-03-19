@@ -10,7 +10,6 @@ using PhoneDirectory.Application.Interfaces;
 using PhoneDirectory.Application.Services;
 using PhoneDirectory.Domain.CustomExceptions;
 using PhoneDirectory.Domain.Entities;
-using PhoneDirectory.Infrastructure.Database;
 using PhoneDirectory.UnitTests.DataHelpers;
 using PhoneDirectory.UnitTests.DtoHelpers;
 using PhoneDirectory.UnitTests.Fixtures;
@@ -41,8 +40,10 @@ namespace PhoneDirectory.UnitTests.UnitTests
             var phoneNumberDto = PhoneNumberDtoHelper.GetOneInvalidCreateDto();
             
             // act
+            var result = await _phoneNumberController.CreatePhoneNumber(phoneNumberDto);
+            
             // assert
-            await Assert.ThrowsAsync<UserNotFoundException>(async () => await _phoneNumberController.CreatePhoneNumber(phoneNumberDto));
+            Assert.IsType<BadRequestObjectResult>(result);
         }
         
         [Fact]
@@ -60,7 +61,7 @@ namespace PhoneDirectory.UnitTests.UnitTests
 
             // assert
             Assert.Equal(countBefore + 1, countAfter);
-            Assert.IsType<OkResult>(result);
+            Assert.IsType<OkObjectResult>(result);
         }
 
         [Fact]
@@ -70,8 +71,10 @@ namespace PhoneDirectory.UnitTests.UnitTests
             var phoneNumberId = int.MaxValue;
             
             // act
-            // assert
-            await Assert.ThrowsAsync<PhoneNumberNotFoundException>(async () => await _phoneNumberController.GetPhoneNumber(phoneNumberId));
+            var result = await _phoneNumberController.GetPhoneNumber(phoneNumberId);
+
+            // assert;
+            Assert.IsType<BadRequestObjectResult>(result);
         }
 
         [Fact]
@@ -101,8 +104,10 @@ namespace PhoneDirectory.UnitTests.UnitTests
             var phoneNumberDto = PhoneNumberDtoHelper.GetOneUpdateDtoWithInvalidId();
             
             // act
+            var result = await _phoneNumberController.UpdatePhoneNumber(phoneNumberDto);
+            
             // assert
-            await Assert.ThrowsAsync<PhoneNumberNotFoundException>(async () => await _phoneNumberController.UpdatePhoneNumber(phoneNumberDto));
+            Assert.IsType<BadRequestObjectResult>(result);
         }
 
         [Fact]
@@ -112,8 +117,10 @@ namespace PhoneDirectory.UnitTests.UnitTests
             var phoneNumberDto = PhoneNumberDtoHelper.GetOneUpdateDtoWithInvalidUserId();
             
             // act
+            var result = await _phoneNumberController.UpdatePhoneNumber(phoneNumberDto);
+            
             // assert
-            await Assert.ThrowsAsync<UserNotFoundException>(async () => await _phoneNumberController.UpdatePhoneNumber(phoneNumberDto));
+            Assert.IsType<BadRequestObjectResult>(result);
         }
 
         [Fact]
@@ -141,8 +148,10 @@ namespace PhoneDirectory.UnitTests.UnitTests
             var phoneNumberId = int.MaxValue;
             
             // act
+            var result = await _phoneNumberController.DeletePhoneNumber(phoneNumberId);
+            
             // assert
-            await Assert.ThrowsAsync<PhoneNumberNotFoundException>(async () => await _phoneNumberController.DeletePhoneNumber(phoneNumberId));
+            Assert.IsType<BadRequestObjectResult>(result);
         }
 
         [Fact]

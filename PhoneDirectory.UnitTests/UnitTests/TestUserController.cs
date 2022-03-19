@@ -1,20 +1,18 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using PhoneDirectory.Api.Controllers;
+using PhoneDirectory.Application.Dtos.FilterDtos;
 using PhoneDirectory.Application.Dtos.GetDtos;
 using PhoneDirectory.Application.Dtos.UpdateDtos;
 using PhoneDirectory.Application.Interfaces;
 using PhoneDirectory.Application.Services;
 using PhoneDirectory.Domain.CustomExceptions;
 using PhoneDirectory.Domain.Entities;
-using PhoneDirectory.Infrastructure.Database;
 using PhoneDirectory.UnitTests.DataHelpers;
 using PhoneDirectory.UnitTests.DtoHelpers;
 using PhoneDirectory.UnitTests.Fixtures;
@@ -45,8 +43,10 @@ namespace PhoneDirectory.UnitTests.UnitTests
             var userDto = UserDtoHelper.GetOneInvalidCreateDto();
             
             // act
+            var result = await _userController.CreateUser(userDto);
+
             // assert
-            await Assert.ThrowsAsync<DivisionNotFoundException>(async () => await _userController.CreateUser(userDto));
+            Assert.IsType<BadRequestObjectResult>(result);
         }
         
         [Fact]
@@ -64,7 +64,7 @@ namespace PhoneDirectory.UnitTests.UnitTests
             
             // assert
             Assert.Equal(countBefore + 1, countAfter);
-            Assert.IsType<OkResult>(result);
+            Assert.IsType<OkObjectResult>(result);
         }
 
         [Fact]
@@ -80,7 +80,7 @@ namespace PhoneDirectory.UnitTests.UnitTests
             var result = await _userController.GetUser(userId);
 
             // assert
-            Assert.IsType<NotFoundResult>(result);
+            Assert.IsType<OkObjectResult>(result);
         }
 
         [Fact]
@@ -111,8 +111,10 @@ namespace PhoneDirectory.UnitTests.UnitTests
             UpdateUserDto userDto = UserDtoHelper.GetUpdateDtoWithInvalidId();
 
             // act
+            var result = await _userController.UpdateUser(userDto);
+            
             // assert
-            await Assert.ThrowsAsync<UserNotFoundException>(async () => await _userController.UpdateUser(userDto));
+            Assert.IsType<BadRequestObjectResult>(result);
         }
 
         [Fact]
@@ -150,8 +152,10 @@ namespace PhoneDirectory.UnitTests.UnitTests
             var userId = int.MaxValue;
             
             // act
+            var result = await _userController.DeleteUser(userId);
+            
             // assert
-            await Assert.ThrowsAsync<UserNotFoundException>(async () => await _userController.DeleteUser(userId));
+            Assert.IsType<BadRequestObjectResult>(result);
         }
 
         [Fact]
@@ -191,10 +195,10 @@ namespace PhoneDirectory.UnitTests.UnitTests
         public async Task SearchUsers_ShouldReturnOk_WhenUsersFound()
         {
             // arrange
-            var namePattern = "Test";
+            var filterDto = new FilterDto(1, "Test");
 
             var users = await _databaseFixture.DbContext.Users
-                .Where(x => x.Name.ToLower().Contains(namePattern.ToLower()))
+                .Where(x => x.Name.ToLower().Contains(filterDto.Name.ToLower()))
                 .Include(x => x.Division)
                 .Include(x => x.PhoneNumbers)
                 .ToListAsync();
@@ -204,7 +208,7 @@ namespace PhoneDirectory.UnitTests.UnitTests
             _mapper.Setup(x => x.Map<List<ApplicationUserDto>>(users)).Returns(userDtos);
 
             // act
-            var result = await _userController.GetUsersByName(namePattern);
+            var result = await _userController.GetUsersByName(filterDto);
             
             // assert
             Assert.Equal(users.Count, userDtos.Count);

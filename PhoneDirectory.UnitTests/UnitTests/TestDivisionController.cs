@@ -1,21 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using PhoneDirectory.Api.Controllers;
+using PhoneDirectory.Application.Dtos.FilterDtos;
 using PhoneDirectory.Application.Dtos.GetDtos;
 using PhoneDirectory.Application.Dtos.UpdateDtos;
 using PhoneDirectory.Application.Interfaces;
 using PhoneDirectory.Application.Services;
 using PhoneDirectory.Domain.CustomExceptions;
 using PhoneDirectory.Domain.Entities;
-using PhoneDirectory.Infrastructure.Database;
 using PhoneDirectory.UnitTests.DataHelpers;
 using PhoneDirectory.UnitTests.DtoHelpers;
 using PhoneDirectory.UnitTests.Fixtures;
@@ -55,7 +52,26 @@ namespace PhoneDirectory.UnitTests.UnitTests
 
             // assert
             Assert.Equal(countBefore + 2, countAfter);
-            Assert.IsType<OkResult>(result);
+            Assert.IsType<OkObjectResult>(result);
+        }
+
+        [Fact]
+        public async Task AddDivisionToExisted_ShouldReturnOk_WhenDivisionCreated()
+        {
+            // arrange
+            var division = DivisionHelper.GetOneCreatedEntity();
+            division.Name = "CreatedNestedDivision1";
+            var divisionDto = DivisionDtoHelper.GetOneCreateDto() with {ParentId = 1};
+            _mapper.Setup(x => x.Map<Division>(divisionDto)).Returns(division);
+            var countBefore = _databaseFixture.DbContext.Divisions.Count();
+            
+            // act
+            var result = await _divisionController.CreateDivision(divisionDto);
+            var countAfter = _databaseFixture.DbContext.Divisions.Count();
+            
+            // assert
+            Assert.Equal(countBefore + 2, countAfter);
+            Assert.IsType<OkObjectResult>(result);
         }
 
         [Fact]
@@ -71,7 +87,7 @@ namespace PhoneDirectory.UnitTests.UnitTests
             var result = await _divisionController.GetDivision(divisionId);
             
             // assert
-            Assert.IsType<NotFoundResult>(result);
+            Assert.IsType<BadRequestObjectResult>(result);
         }
 
         [Fact]
@@ -81,7 +97,7 @@ namespace PhoneDirectory.UnitTests.UnitTests
             var divisionId = 1;
 
             var division = await _databaseFixture.DbContext.Divisions
-                .Include(x => x.Divisions)
+                .Include(x => x.ChildDivisions)
                 .Include(x => x.Users)
                 .FirstOrDefaultAsync(x => x.Id == divisionId);
             
@@ -105,8 +121,10 @@ namespace PhoneDirectory.UnitTests.UnitTests
             _mapper.Setup(x => x.Map<UpdateDivisionDto>(division)).Returns(divisionDto);
 
             // act
+            var result = await _divisionController.UpdateDivision(divisionDto);
+
             // assert
-            await Assert.ThrowsAsync<DivisionNotFoundException>(async () => await _divisionController.UpdateDivision(divisionDto));
+            Assert.IsType<BadRequestObjectResult>(result);
         }
         
         [Fact]
@@ -139,8 +157,10 @@ namespace PhoneDirectory.UnitTests.UnitTests
             var divisionId = int.MaxValue;
             
             // act
+            var result = await _divisionController.DeleteDivision(divisionId);
+            
             // assert
-            await Assert.ThrowsAsync<DivisionNotFoundException>(async () => await _divisionController.DeleteDivision(divisionId));
+            Assert.IsType<BadRequestObjectResult>(result);
         }
 
         [Fact]
@@ -163,22 +183,26 @@ namespace PhoneDirectory.UnitTests.UnitTests
         public async Task SearchByDivisions_ShouldReturnNotFound_WhenDivisionsNotFound()
         {
             // arrange
-            var namePattern = "Test";
+            var filterDto = new FilterDto(1, "Test");
 
-            var divisions = await _databaseFixture.DbContext.Divisions
-                .Where(x => x.Name.ToLower().Contains(namePattern.ToLower()))
-                .Include(x => x.Divisions)
+            var division = await _databaseFixture.DbContext.Divisions
                 .Include(x => x.Users)
-                .ToListAsync();
+                .Include(x => x.ChildDivisions)
+                .Include(x => x.ParentDivision)
+                .FirstOrDefaultAsync(x => x.Id == filterDto.ParentId);
+            
+            var divisions = division.ChildDivisions
+                .Where(x => x.Name.ToLower().Contains(filterDto.Name!.ToLower()))
+                .ToList();
             
             var divisionDtos = DivisionDtoHelper.GetManyDefaultDtos();
             _mapper.Setup(x => x.Map<List<DivisionDto>>(divisions)).Returns(divisionDtos);
             
             // act
-            var result = await _divisionController.GetDivisionsByName(namePattern);
+            var result = await _divisionController.GetDivisionsByName(filterDto);
             
             // assert
-            Assert.Equal(5, divisions.Count);
+            Assert.Single(divisions);
             Assert.IsType<OkObjectResult>(result);
         }
     }

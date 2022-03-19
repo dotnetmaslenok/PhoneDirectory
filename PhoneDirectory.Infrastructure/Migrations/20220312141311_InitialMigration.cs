@@ -13,14 +13,14 @@ namespace PhoneDirectory.Infrastructure.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    DivisionId = table.Column<int>(type: "int", nullable: true)
+                    ParentDivisionId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Divisions", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Divisions_Divisions_DivisionId",
-                        column: x => x.DivisionId,
+                        name: "FK_Divisions_Divisions_ParentDivisionId",
+                        column: x => x.ParentDivisionId,
                         principalTable: "Divisions",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
@@ -68,9 +68,9 @@ namespace PhoneDirectory.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Divisions_DivisionId",
+                name: "IX_Divisions_ParentDivisionId",
                 table: "Divisions",
-                column: "DivisionId");
+                column: "ParentDivisionId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PhoneNumbers_UserId",

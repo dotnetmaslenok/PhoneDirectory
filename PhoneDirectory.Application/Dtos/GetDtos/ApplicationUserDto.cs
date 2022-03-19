@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using PhoneDirectory.Application.BaseDtos;
 
 namespace PhoneDirectory.Application.Dtos.GetDtos

@@ -10,7 +10,7 @@ using PhoneDirectory.Infrastructure.Database;
 namespace PhoneDirectory.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20220306102735_InitialMigration")]
+    [Migration("20220312141311_InitialMigration")]
     partial class InitialMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -51,15 +51,15 @@ namespace PhoneDirectory.Infrastructure.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int?>("DivisionId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("ParentDivisionId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("DivisionId");
+                    b.HasIndex("ParentDivisionId");
 
                     b.ToTable("Divisions");
                 });
@@ -97,9 +97,11 @@ namespace PhoneDirectory.Infrastructure.Migrations
 
             modelBuilder.Entity("PhoneDirectory.Domain.Entities.Division", b =>
                 {
-                    b.HasOne("PhoneDirectory.Domain.Entities.Division", null)
-                        .WithMany("Divisions")
-                        .HasForeignKey("DivisionId");
+                    b.HasOne("PhoneDirectory.Domain.Entities.Division", "ParentDivision")
+                        .WithMany("ChildDivisions")
+                        .HasForeignKey("ParentDivisionId");
+
+                    b.Navigation("ParentDivision");
                 });
 
             modelBuilder.Entity("PhoneDirectory.Domain.Entities.PhoneNumber", b =>
@@ -120,7 +122,7 @@ namespace PhoneDirectory.Infrastructure.Migrations
 
             modelBuilder.Entity("PhoneDirectory.Domain.Entities.Division", b =>
                 {
-                    b.Navigation("Divisions");
+                    b.Navigation("ChildDivisions");
 
                     b.Navigation("Users");
                 });
